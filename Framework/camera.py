@@ -50,6 +50,7 @@ class Camera2(pygame.sprite.Group):
         return self.offset.y + self.internal_offset.y
 
     def draw(self, entities, target):
+        '''draw entities that need to be sorted'''
 
         self.center_target(target)
 
@@ -59,13 +60,14 @@ class Camera2(pygame.sprite.Group):
             self.internal_surface.blit(entity.getImage(), offset_pos)
 
         scaled_surface = pygame.transform.scale(self.internal_surface, self.internal_surface_size_vector * self.zoom_scale)
-        if self.screen.get_size() > scaled_surface.get_size():
+        if self.screen.get_size() >= scaled_surface.get_size():
             scaled_surface = pygame.transform.scale(scaled_surface, self.screen.get_size())
         scaled_rect = scaled_surface.get_rect(center = (self.half_w, self.half_h))
         
         self.screen.blit(scaled_surface,scaled_rect)
 
     def draw_background(self, entities, target):
+        '''draw background seperately to avoid sorting'''
 
         self.center_target(target)
 
@@ -76,7 +78,7 @@ class Camera2(pygame.sprite.Group):
         # scale the surface with the drawings to the appropriate size
         scaled_surface = pygame.transform.scale(self.internal_surface,self.internal_surface_size_vector * self.zoom_scale)
         # if the surface is smaller than the window, make it fit the screen
-        if self.screen.get_size() > scaled_surface.get_size():
+        if self.screen.get_size() >= scaled_surface.get_size():
             scaled_surface = pygame.transform.scale(scaled_surface, self.screen.get_size())
         scaled_rect = scaled_surface.get_rect(center = (self.half_w,self.half_h))
 

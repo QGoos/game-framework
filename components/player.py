@@ -54,22 +54,18 @@ class Player(entity.Entity):
 
     def collide(self, entity) -> None:
         '''check if player is colliding and fix it'''
-        collision_tolerance = 10
         is_self = self.collisionRect()
-        #self_center = is_self.center
         is_entity = entity.collisionRect()
-        #entity_center = is_entity.center
 
         if self.getZ() == entity.getZ():
-            if (is_self.colliderect(is_entity)):#(dist - col_dist <= 0):# and x_diff != 0 and y_diff != 0):
-                if(abs(self.last_move[1]) > abs(self.last_move[0])):#(x_diff < y_diff):
+            if (is_self.colliderect(is_entity)):
+                if(abs(self.last_move[1]) > abs(self.last_move[0])):
                     self.hitbox.y += self.last_move[1]*-1
                     self.rect.y += self.last_move[1]*-1
                 elif(abs(self.last_move[1]) < abs(self.last_move[0])):
                     self.hitbox.x += self.last_move[0]*-1
                     self.rect.x += self.last_move[0]*-1
                 else:
-                    #print(self.last_move,[self.last_move[0]*-1,self.last_move[1]*-1])
                     self.hitbox = self.hitbox.move([self.last_move[0]*-1,0])
                     self.rect = self.rect.move([self.last_move[0]*-1,0])
                     if(self.hitbox.colliderect(is_entity)):
