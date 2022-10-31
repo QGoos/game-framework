@@ -59,12 +59,14 @@ class Player(entity.Entity):
 
         if self.getZ() == entity.getZ():
             if (is_self.colliderect(is_entity)):
+                # check move direction
                 if(abs(self.last_move[1]) > abs(self.last_move[0])):
                     self.hitbox.y += self.last_move[1]*-1
                     self.rect.y += self.last_move[1]*-1
                 elif(abs(self.last_move[1]) < abs(self.last_move[0])):
                     self.hitbox.x += self.last_move[0]*-1
                     self.rect.x += self.last_move[0]*-1
+                # account for multi directional movement
                 else:
                     self.hitbox = self.hitbox.move([self.last_move[0]*-1,0])
                     self.rect = self.rect.move([self.last_move[0]*-1,0])
