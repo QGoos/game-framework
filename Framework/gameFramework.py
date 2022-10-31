@@ -23,9 +23,6 @@ class Game():
         self.game_name = game_name
         self.chunk_size = 4
         self.tile_size = 32
-
-        # prep for camera
-        self.camera: Camera
        
         # create clock
         self.clock = pygame.time.Clock()
