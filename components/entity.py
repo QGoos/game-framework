@@ -19,15 +19,19 @@ class Entity(pygame.sprite.Sprite):
 
 
     def getRectCorner(self):
+        '''return top left corner of rect'''
         return self.rect.topleft
 
     def collisionRect(self) -> pygame.Rect:
+        '''get hitbox rect'''
         return self.hitbox #self.rect
 
     def setHitbox(self,width,height) -> None:
+        '''set hitbox rect with reference to rect'''
         self.hitbox = pygame.Rect(self.rect.x + (self.width//2) - (width//2), self.rect.y + self.height - height, width, height)
     
     def centerY(self) -> int:
+        '''center of rect y axis'''
         return self.rect.centery
 
     def colWidth(self) -> int:
@@ -69,6 +73,3 @@ class Entity(pygame.sprite.Sprite):
     
     def getImage(self) -> pygame.Surface:
         return self.image
-
-    def isOnscreen(self, screen) -> bool:
-        return self.rect.colliderect(screen.get_rect())

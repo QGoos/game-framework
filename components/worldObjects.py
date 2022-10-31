@@ -20,6 +20,7 @@ class Tree(entity.Entity):
         return self.image
 
     def getTrunk(self) -> pygame.Surface:
+        '''generate a corresponding trunk to the tree'''
         if(not self.trunk):
             trunk_width = 4
             trunk_height = 24

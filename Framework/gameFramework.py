@@ -38,27 +38,24 @@ class Game():
         self.dt = time.time() - self.last_time
 
     def check_dt(self):
+        '''return the delta time since last check'''
         self.dt = time.time() - self.last_time
 
     def set_dt(self, multiplier):
+        '''scale the delta time'''
         self.check_dt()
         self.dt *= multiplier
 
     def set_last_time(self):
+        '''initialize last time checked'''
         self.last_time = time.time()
-
-    def set_up_camera(self, player) -> None:
-        '''Set up a camera set to follow'''
-        self.camera = Camera(player, self.display_width, self.display_height)
-        follow = Follow(self.camera, player)
-        self.camera.setMethod(follow)
 
     def set_up_camera_group(self) -> None:
         '''create camera group'''
         self.CG = Camera2(self.screen)
 
     def generate_chunk(self,x,y):
-        '''generate a chunk of map'''
+        '''generate a chunk of map, entities and background separate'''
         chunk_entities = []
         chunk_entity_tiles = self.generate_background(0,x,y)
 
@@ -83,6 +80,7 @@ class Game():
         return [chunk_entities,chunk_entity_tiles]
 
     def generate_background(self,tile_identifier,x,y):
+        '''generate background tiles of map'''
         background = []
         for y_pos in range(self.chunk_size):
             for x_pos in range(self.chunk_size):
@@ -102,10 +100,7 @@ class Game():
         self.set_up_camera_group()
 
         # a temp player
-        main_player = player.Player(400,300,32,32,5, self.CG)
-
-        # the camera
-        self.set_up_camera(main_player)
+        main_player = player.Player(400,300,32,32,3, self.CG)
 
         # generate forest
         world_objects = []
@@ -123,13 +118,9 @@ class Game():
         last_time = time.time()
 
         while True:
-
+            # framerate independende
             self.set_dt(60)
             self.set_last_time()
-            # paint screen black to "clear" it
-            #screen.fill((0,0,0))
-            #screen.fill((180,255,165))
-            self.screen.fill((139,169,133))
 
             # close on x button
             for event in pygame.event.get():
@@ -140,23 +131,25 @@ class Game():
                 if event.type == pygame.MOUSEWHEEL:
                     self.CG.set_zoom_scale(event.y * 0.03)
 
-            # load chunks into entities
+            # load chunks into entities, load chunks when we switch chunks
             if current_chunk != last_chunk:
                 entities_to_draw = [main_player]
                 background_entities = []
                 entities = []
                 for y in range(11):#6 #or 10
                     for x in range(13):#7 #or 12
+                        #offset chunks
                         target_x = x - 1 + int(self.CG.get_camera_x()/(self.chunk_size * self.tile_size))
                         target_y = y - 1 + int(self.CG.get_camera_y()/(self.chunk_size * self.tile_size))
-                        #print(self.CG.get_camera_x(),self.CG.get_camera_y())
                         target_chunk = str(target_x) + ';' + str(target_y)
+                        # creat or load unloaded chunks
                         if target_chunk not in chunks:
                             chunks[target_chunk] = self.generate_chunk(target_x,target_y)
                         background_entities.extend(chunks[target_chunk][1])
                         entities_to_draw.extend(chunks[target_chunk][0])
                         entities.extend(chunks[target_chunk][0])
 
+                # add objects that need to be updated separate from unchanging objects
                 self.CG.add(entities)
                 self.CG.add(background_entities)
 
@@ -168,10 +161,10 @@ class Game():
                 main_player.collide(entity)
             
             # move the camera
-            #self.camera.scroll()
             self.CG.draw_background(background_entities, main_player)
             self.CG.draw(entities_to_draw, main_player)
 
+            # check player chunk
             if current_chunk != last_chunk:
                 self.CG.remove(entities)
                 self.CG.remove(background_entities)

@@ -2,38 +2,6 @@ from abc import ABC, abstractmethod
 from pygame.math import Vector2 as vec
 import pygame
 
-class Camera:
-    def __init__(self, player, screen_width, screen_height)  -> None:
-        self.player = player
-        self.offset = vec(0,0)
-        self.offset_float = vec(0,0)
-        self.SCREEN_W, self.SCREEN_H = screen_width, screen_height
-        self.CONST = vec(-self.SCREEN_W//2 + player.getWidth()//2, -self.SCREEN_H//2 + self.player.getHeight()//2)
-
-    def setMethod(self, method) -> None:
-        self.method = method
-
-    def scroll(self) -> None:
-        self.method.scroll()
-
-class CamScroll(ABC):
-    def __init__(self, camera, player) -> None:
-        self.camera = camera
-        self.player = player
-
-    @abstractmethod
-    def scroll(self):
-        pass
-
-class Follow(CamScroll):
-    def __init__(self, camera, player) -> None:
-        super().__init__(camera, player)
-
-    def scroll(self):
-        self.camera.offset_float.x += (self.player.getX() - self.camera.offset_float.x + self.camera.CONST.x)
-        self.camera.offset_float.y += (self.player.getY() - self.camera.offset_float.y + self.camera.CONST.y)
-        self.camera.offset.x, self.camera.offset.y = int(self.camera.offset_float.x), int(self.camera.offset_float.y)
-
 class Camera2(pygame.sprite.Group):
     def __init__(self, screen) -> None:
         super().__init__()
@@ -85,10 +53,9 @@ class Camera2(pygame.sprite.Group):
 
         self.center_target(target)
 
+        # sort by y axis, account for height
         for entity in sorted(entities, key = lambda entity: entity.centerY() + entity.getZ()):
             offset_pos = entity.getRectCorner() - self.offset + self.internal_offset
-            #print(entity.getRectCorner(),entity.getX(),entity.getY())
-            #self.screen.blit(entity.getImage(), offset_pos)
             self.internal_surface.blit(entity.getImage(), offset_pos)
 
         scaled_surface = pygame.transform.scale(self.internal_surface, self.internal_surface_size_vector * self.zoom_scale)
@@ -104,8 +71,6 @@ class Camera2(pygame.sprite.Group):
 
         for entity in entities:
             offset_pos = entity.getRectCorner() - self.offset + self.internal_offset
-            #print(entity.getRectCorner(),entity.getX(),entity.getY())
-            #self.screen.blit(entity.getImage(), offset_pos)
             self.internal_surface.blit(entity.getImage(), offset_pos)
 
         # scale the surface with the drawings to the appropriate size
