@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pygame.math import Vector2 as vec
 import pygame
 
-class Camera2(pygame.sprite.Group):
+class Camera(pygame.sprite.Group):
     def __init__(self, screen) -> None:
         super().__init__()
         self.screen = screen

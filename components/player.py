@@ -73,5 +73,8 @@ class Player(entity.Entity):
                     if(self.hitbox.colliderect(is_entity)):
                         self.hitbox = self.hitbox.move([self.last_move[0]*1,self.last_move[1]*-1])
                         self.rect = self.rect.move([self.last_move[0]*1,self.last_move[1]*-1])
+                    if(self.hitbox.colliderect(is_entity)):
+                        self.hitbox = self.hitbox.move([self.last_move[0]*-1,0])
+                        self.rect = self.rect.move([self.last_move[0]*-1,0])
 
             

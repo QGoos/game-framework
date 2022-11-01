@@ -49,7 +49,7 @@ class Game():
 
     def set_up_camera_group(self) -> None:
         '''create camera group'''
-        self.CG = Camera2(self.screen)
+        self.CG = Camera(self.screen)
 
     def generate_chunk(self,x,y):
         '''generate a chunk of map, entities and background separate'''
