@@ -73,3 +73,18 @@ class Entity(pygame.sprite.Sprite):
     
     def getImage(self) -> pygame.Surface:
         return self.image
+
+    def get_offsets(self):
+        pass
+
+    def get_offset_x(self):
+        pass
+
+    def get_offset_y(self):
+        pass
+
+    def set_offset_x(self):
+        pass
+
+    def set_offset_y(self):
+        pass

@@ -73,6 +73,9 @@ class Camera(pygame.sprite.Group):
 
         for entity in entities:
             offset_pos = entity.getRectCorner() - self.offset + self.internal_offset
+            offsets = entity.get_offsets()
+            offset_pos[0], offset_pos[1] = (offset_pos[0] + offsets[0]), (offset_pos[1] + offsets[1])
+            #print(offset_pos)
             self.internal_surface.blit(entity.getImage(), offset_pos)
 
         # scale the surface with the drawings to the appropriate size

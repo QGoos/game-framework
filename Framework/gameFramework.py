@@ -55,12 +55,13 @@ class Game():
         '''generate a chunk of map, entities and background separate'''
         chunk_entities = []
         chunk_entity_tiles = self.generate_background(0,x,y)
+        offset = [0,x * 32 * 2]
 
         for i in range(random.randrange(0,3)):#range(10):#
             tmp_wdth = random.randrange(8,24)
             tmp_hght = random.randrange(32,64)
-            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x * self.tile_size
-            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y * self.tile_size
+            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x * self.tile_size + offset[0]
+            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y * self.tile_size + offset[1]
 
             tmp_obj = worldObjects.Tree(tmp_x,tmp_y, tmp_wdth, tmp_hght, self.CG)
             chunk_entities.append(tmp_obj.getTrunk())
@@ -68,8 +69,8 @@ class Game():
 
         for i in range(random.randrange(0,3)-1):
             tmp_wdth = random.randrange(16,32)
-            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x  * self.tile_size
-            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y  * self.tile_size
+            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x  * self.tile_size + offset[0]
+            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y  * self.tile_size + offset[1]
 
             tmp_obj = worldObjects.Rock(tmp_x,tmp_y, tmp_wdth, tmp_wdth, self.CG)
             chunk_entities.append(tmp_obj)
@@ -79,14 +80,15 @@ class Game():
     def generate_background(self,tile_identifier,x,y):
         '''generate background tiles of map'''
         background = []
+        offset = [0, x * self.tile_size * 2]
         for y_pos in range(self.chunk_size):
             for x_pos in range(self.chunk_size):
-                target_x = x * self.chunk_size * self.tile_size + x_pos * self.tile_size
-                target_y = y * self.chunk_size * self.tile_size + y_pos * self.tile_size
+                target_x = x * self.chunk_size * self.tile_size + x_pos * self.tile_size + offset[0] # + (y * self.tile_size * self.chunk_size)
+                target_y = y * self.chunk_size * self.tile_size + y_pos * self.tile_size + offset[1] # + (x * self.tile_size * self.chunk_size - y * self.tile_size* self.chunk_size)
 
                 #logic for tile type
                 if tile_identifier == 0:
-                    background.append(worldObjects.BackgroundBlock(target_x, target_y, 32, 32, self.CG))
+                    background.append(worldObjects.BackgroundBlockIso(target_x, target_y, 32, 32, self.CG, x_pos, y_pos))
 
         return background
         
@@ -97,7 +99,7 @@ class Game():
         self.set_up_camera_group()
 
         # a temp player
-        main_player = player.Player(400,300,32,32,3, self.CG)
+        main_player = player.Player(0,0,32,32,3, self.CG)
 
         # generate forest
         world_objects = []
@@ -133,8 +135,8 @@ class Game():
                 entities_to_draw = [main_player]
                 background_entities = []
                 entities = []
-                for y in range(11):#6 #or 10
-                    for x in range(13):#7 #or 12
+                for y in range(-4,6,1):#11 #6 #or 10
+                    for x in range(-4,6,1):#13 #7 #or 12
                         #offset chunks
                         target_x = x - 1 + int(self.CG.get_camera_x()/(self.chunk_size * self.tile_size))
                         target_y = y - 1 + int(self.CG.get_camera_y()/(self.chunk_size * self.tile_size))
@@ -149,8 +151,11 @@ class Game():
                 # add objects that need to be updated separate from unchanging objects
                 self.CG.add(entities)
                 self.CG.add(background_entities)
-
-            last_chunk = f'{main_player.getRectCorner()[0] // (self.chunk_size*self.tile_size)};{main_player.getRectCorner()[1] // (self.chunk_size*self.tile_size)}'
+            #print(current_chunk,last_chunk)
+            #x_sign,y_sign = (main_player.getRect().centerx)/abs(main_player.getRect().centerx),(main_player.getRect().centery)/abs(main_player.getRect().centery)
+            #chunk_dist = (abs(main_player.getRect().centerx*2) + abs(main_player.getRect().centery))//(32*16)
+            #print(chunk_dist,main_player.getRect().centerx,main_player.getRect().centery)
+            last_chunk = f'{main_player.getRect().centerx // (self.chunk_size*self.tile_size*2)};{main_player.getRect().centery // (self.chunk_size*self.tile_size)}'
             
             self.CG.update(self.dt)
             for entity in entities:
@@ -166,7 +171,7 @@ class Game():
                 self.CG.remove(entities)
                 self.CG.remove(background_entities)
                 
-            current_chunk = f'{main_player.getRectCorner()[0] // (self.chunk_size*self.tile_size)};{main_player.getRectCorner()[1] // (self.chunk_size*self.tile_size)}'
+            current_chunk = f'{main_player.getRect().centerx // (self.chunk_size*self.tile_size*2)};{main_player.getRect().centery // (self.chunk_size*self.tile_size*2)}'
 
             # tick rate
             self.clock.tick(self.tick_rate)

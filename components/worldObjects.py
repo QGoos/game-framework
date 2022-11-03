@@ -6,7 +6,32 @@ class BackgroundBlock(entity.Entity):
         super().__init__(x, y, width, height, group)
         self.group = None
         self.z = -1
-        self.image = pygame.image.load('./components/graphics/grass.png')#.fill((181,230,29))
+        self.image = pygame.image.load('./components/graphics/grass.png').convert()#.fill((181,230,29))
+
+class BackgroundBlockIso(entity.Entity):
+    def __init__(self, x, y, width, height, group, offset_x, offset_y) -> None:
+        super().__init__(x, y, width, height, group)
+        self.group = None
+        self.z = -1
+        self.image = pygame.image.load('./components/graphics/grass-iso.png').convert()#.fill((181,230,29))
+        self.image.set_colorkey((0,0,0))
+        self.offset_x = offset_x
+        self.offset_y = offset_y
+
+    def get_offsets(self):
+        return [self.offset_x - self.offset_y * 32, self.offset_x * 16 - self.offset_y * 16]
+
+    def get_offset_x(self):
+        return self.offset_x
+
+    def get_offset_y(self):
+        return self.offset_y
+
+    def set_offset_x(self):
+        pass
+
+    def set_offset_y(self):
+        pass
 
 class Tree(entity.Entity):
     def __init__(self, x, y, width, height, group) -> None:
