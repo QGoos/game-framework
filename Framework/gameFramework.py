@@ -4,6 +4,7 @@ import components.player as player
 import components.worldObjects as worldObjects
 import random
 from Framework.camera import *
+from Framework.levelHandler import *
 import os
 import time
 
@@ -21,8 +22,11 @@ class Game():
         self.display_width = display_width
         self.display_height = display_height
         self.game_name = game_name
-        self.chunk_size = 4
-        self.tile_size = 32
+        self.chunk_size = 8
+        self.tile_size = 16
+
+        self.CG = None
+        self.LH = None
        
         # create clock
         self.clock = pygame.time.Clock()
@@ -49,55 +53,21 @@ class Game():
 
     def set_up_camera_group(self) -> None:
         '''create camera group'''
-        self.CG = Camera(self.screen)
+        self.CG = Camera2(self.screen, self.tile_size)
 
-    def generate_chunk(self,x,y):
-        '''generate a chunk of map, entities and background separate'''
-        chunk_entities = []
-        chunk_entity_tiles = self.generate_background(0,x,y)
-
-        for i in range(random.randrange(0,3)):#range(10):#
-            tmp_wdth = random.randrange(8,24)
-            tmp_hght = random.randrange(32,64)
-            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x * self.tile_size
-            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y * self.tile_size
-
-            tmp_obj = worldObjects.Tree(tmp_x,tmp_y, tmp_wdth, tmp_hght, self.CG)
-            chunk_entities.append(tmp_obj.getTrunk())
-            chunk_entities.append(tmp_obj)
-
-        for i in range(random.randrange(0,3)-1):
-            tmp_wdth = random.randrange(16,32)
-            tmp_x = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * x  * self.tile_size
-            tmp_y = random.randrange(0,self.chunk_size) * self.tile_size + self.chunk_size * y  * self.tile_size
-
-            tmp_obj = worldObjects.Rock(tmp_x,tmp_y, tmp_wdth, tmp_wdth, self.CG)
-            chunk_entities.append(tmp_obj)
-
-        return [chunk_entities,chunk_entity_tiles]
-
-    def generate_background(self,tile_identifier,x,y):
-        '''generate background tiles of map'''
-        background = []
-        for y_pos in range(self.chunk_size):
-            for x_pos in range(self.chunk_size):
-                target_x = x * self.chunk_size * self.tile_size + x_pos * self.tile_size
-                target_y = y * self.chunk_size * self.tile_size + y_pos * self.tile_size
-
-                #logic for tile type
-                if tile_identifier == 0:
-                    background.append(worldObjects.BackgroundBlock(target_x, target_y, 32, 32, self.CG))
-
-        return background
+    def set_up_level_handler(self) -> None:
+        '''create a level handler'''
+        self.LH = LevelHandler(self.tile_size, self.chunk_size)
         
     def run_game(self) -> None:
         '''runs a game'''
         pygame.init()
         
         self.set_up_camera_group()
+        self.set_up_level_handler()
 
         # a temp player
-        main_player = player.Player(400,300,32,32,3, self.CG)
+        main_player = player.Player(0,0,self.tile_size,self.tile_size,3, self.CG)
 
         # generate forest
         world_objects = []
@@ -133,24 +103,18 @@ class Game():
                 entities_to_draw = [main_player]
                 background_entities = []
                 entities = []
-                for y in range(11):#6 #or 10
-                    for x in range(13):#7 #or 12
-                        #offset chunks
-                        target_x = x - 1 + int(self.CG.get_camera_x()/(self.chunk_size * self.tile_size))
-                        target_y = y - 1 + int(self.CG.get_camera_y()/(self.chunk_size * self.tile_size))
-                        target_chunk = str(target_x) + ';' + str(target_y)
-                        # creat or load unloaded chunks
-                        if target_chunk not in chunks:
-                            chunks[target_chunk] = self.generate_chunk(target_x,target_y)
-                        background_entities.extend(chunks[target_chunk][1])
-                        entities_to_draw.extend(chunks[target_chunk][0])
-                        entities.extend(chunks[target_chunk][0])
+
+                loaded = self.LH.load_chunks((self.CG.get_camera_x(), self.CG.get_camera_y()), self.CG)
+
+                background_entities.extend(loaded[1])
+                entities_to_draw.extend(loaded[0])
+                entities = entities_to_draw[1:]
 
                 # add objects that need to be updated separate from unchanging objects
                 self.CG.add(entities)
                 self.CG.add(background_entities)
 
-            last_chunk = f'{main_player.getRectCorner()[0] // (self.chunk_size*self.tile_size)};{main_player.getRectCorner()[1] // (self.chunk_size*self.tile_size)}'
+            last_chunk = self.LH.which_chunk(main_player.getRect())#f'{main_player.getRect().centerx // (self.chunk_size*self.tile_size)};{main_player.getRect().centery // (self.chunk_size*self.tile_size)}'
             
             self.CG.update(self.dt)
             for entity in entities:
@@ -166,7 +130,7 @@ class Game():
                 self.CG.remove(entities)
                 self.CG.remove(background_entities)
                 
-            current_chunk = f'{main_player.getRectCorner()[0] // (self.chunk_size*self.tile_size)};{main_player.getRectCorner()[1] // (self.chunk_size*self.tile_size)}'
+            current_chunk = self.LH.which_chunk(main_player.getRect())#f'{main_player.getRectCorner()[0] // (self.chunk_size*self.tile_size)};{main_player.getRectCorner()[1] // (self.chunk_size*self.tile_size)}'
 
             # tick rate
             self.clock.tick(self.tick_rate)

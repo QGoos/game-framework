@@ -10,7 +10,8 @@ class Player(entity.Entity):
         super().__init__(x, y, width, height, group)
         self.speed = speed
         self.pre_move = (x,y)
-        self.image.fill((97, 239, 236))
+        self.image = pygame.image.load(f'./components/graphics/mage_right.png').convert()
+        self.image.set_colorkey((255,255,255))
         self.last_move = [0,0]
         self.setHitbox(width, height//2)
 
@@ -48,7 +49,7 @@ class Player(entity.Entity):
         if keys[pygame.K_e]:
             self.speed = 50
         if keys[pygame.K_q]:
-            self.speed = 5
+            self.speed = 3
 
         self.move(input_vect,dt)
 

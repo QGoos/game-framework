@@ -2,11 +2,19 @@ import pygame
 from components import entity
 
 class BackgroundBlock(entity.Entity):
-    def __init__(self, x, y, width, height, group) -> None:
-        super().__init__(x, y, width, height, group)
+    def __init__(self, x, y, size, type_value, group) -> None:
+        super().__init__(x, y, size, size, group)
         self.group = None
         self.z = -1
-        self.image = pygame.image.load('./components/graphics/grass.png')#.fill((181,230,29))
+        self.bg_value = type_value
+        self.image = pygame.image.load(f'./components/graphics/{self.get_background_type(self.bg_value)}.png').convert()
+    
+    def set_default_chunk_image(self):
+        self.image = pygame.image.load(f'./components/graphics/{self.get_background_type(self.bg_value)}_chunk_default.png').convert()
+
+    def get_background_type(self, value):
+        values = ['grass2','ice','water','sand','rock']
+        return values[value]
 
 class Tree(entity.Entity):
     def __init__(self, x, y, width, height, group) -> None:
@@ -22,8 +30,8 @@ class Tree(entity.Entity):
     def getTrunk(self) -> pygame.Surface:
         '''generate a corresponding trunk to the tree'''
         if(not self.trunk):
-            trunk_width = 4
-            trunk_height = 24
+            trunk_width = self.width//4
+            trunk_height = self.height*3//4
             trunk_x = self.x + (self.width//2) - trunk_width//2
             trunk_y = self.y + self.height
 
